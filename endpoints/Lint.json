@@ -1,0 +1,43 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Linting Webhook",
+    "version": "1.0.0",
+    "description": "Webhook to handle linting on API Server resource changes."
+  },
+  "paths": {
+    "/lint": {
+      "post": {
+        "operationId": "Lint",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "event",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The linting completed."
+          },
+          "400": {
+            "description": "The resource is not a lintable resource."
+          },
+          "500": {
+            "description": "Unknown error."
+          }
+        },
+        "x-flow": "Lint-Lint"
+      }
+    }
+  }
+}

@@ -1,0 +1,598 @@
+{
+	"schemaVersion": "4",
+	"info": {
+		"name": "Lint - post /lint"
+	},
+	"parameter": {
+		"properties": {
+			"params": {
+				"type": "object",
+				"description": "The parameters from the endpoint."
+			},
+			"request": {
+				"type": "object",
+				"description": "The HTTP request."
+			},
+			"config": {
+				"type": "object",
+				"description": "The service's configuration"
+			},
+			"env": {
+				"type": "object",
+				"description": "The host OS environment"
+			}
+		},
+		"additionalProperties": false,
+		"required": [
+			"params",
+			"request",
+			"config",
+			"env"
+		]
+	},
+	"start": "setcontext.1",
+	"nodes": {
+		"http.1": {
+			"type": "nodehandler://axway-flow/http",
+			"name": "Success",
+			"method": "setresponse",
+			"parameters": [
+				{
+					"name": "status",
+					"type": "number",
+					"value": "200",
+					"metaName": "Status",
+					"metaDescription": "The HTTP status code"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set HTTP Response"
+		},
+		"spectral.1": {
+			"type": "nodehandler://@bladedancer/api-builder-plugin-spectral/spectral",
+			"name": "Lint",
+			"method": "lint",
+			"parameters": [
+				{
+					"name": "type",
+					"type": "string",
+					"value": "\"oas\"",
+					"metaName": "Type",
+					"metaDescription": "The API Specification type."
+				},
+				{
+					"name": "document",
+					"type": "jsonpath",
+					"value": "$.oas",
+					"metaName": "Document",
+					"metaDescription": "The API Specification to lint."
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.lintresult",
+					"routes": [
+						"condition.2"
+					],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [
+						"condition.2"
+					],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Lint"
+		},
+		"condition.1": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "Exists",
+			"method": "exists",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.apiservicerevision",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"centralauth.1",
+						"base64.1"
+					],
+					"context": "$.exists",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"http.4"
+					],
+					"context": "$.exists",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Exists"
+		},
+		"condition.3": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "IsHTTPError",
+			"method": "exists",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.error.status",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"http.2"
+					],
+					"context": "$.exists",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"http.3"
+					],
+					"context": "$.exists",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Exists"
+		},
+		"http.2": {
+			"type": "nodehandler://axway-flow/http",
+			"name": "HTTPError",
+			"method": "setresponse",
+			"parameters": [
+				{
+					"name": "status",
+					"type": "jsonpath",
+					"value": "$.error.status",
+					"metaName": "Status",
+					"metaDescription": "The HTTP status code"
+				},
+				{
+					"name": "body",
+					"type": "jsonpath",
+					"value": "$.error.data",
+					"metaName": "Body",
+					"metaDescription": "The response payload"
+				},
+				{
+					"name": "headers",
+					"type": "jsonpath",
+					"value": "$.error.headers",
+					"metaName": "Headers",
+					"metaDescription": "Key-value pairs of headers"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set HTTP Response"
+		},
+		"http.3": {
+			"type": "nodehandler://axway-flow/http",
+			"name": "UnexpectedError",
+			"method": "setresponse",
+			"parameters": [
+				{
+					"name": "status",
+					"type": "number",
+					"value": "500",
+					"metaName": "Status",
+					"metaDescription": "The HTTP status code"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set HTTP Response"
+		},
+		"http.4": {
+			"type": "nodehandler://axway-flow/http",
+			"name": "BadRequest",
+			"method": "setresponse",
+			"parameters": [
+				{
+					"name": "status",
+					"type": "number",
+					"value": "400",
+					"metaName": "Status",
+					"metaDescription": "The HTTP status code"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set HTTP Response"
+		},
+		"javascript.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-javascript/javascript",
+			"name": "InjectResult",
+			"method": "Execute",
+			"parameters": [
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$",
+					"metaName": "Data",
+					"metaDescription": "The value to apply as the `data` argument to the JavaScript code. For objects and arrays, `data` is passed by reference."
+				},
+				{
+					"name": "code",
+					"type": "string",
+					"value": "\"data.apiservicerevision['x-lint'] = data.lintresult;\\n  return data.apiservicerevision;\"",
+					"metaName": "Code",
+					"metaDescription": "A JavaScript function body. Supports `await` and returning promises."
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.apiservicerevision",
+					"routes": [
+						"condition.4"
+					],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [
+						"condition.4"
+					],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Execute"
+		},
+		"centralauth.1": {
+			"type": "nodehandler://@bladedancer/api-builder-plugin-centralauth/centralauth",
+			"name": "Authenticate with signed JWT",
+			"method": "authenticateJWT",
+			"parameters": [
+				{
+					"name": "kid",
+					"type": "jsonpath",
+					"value": "$.config.apiserver.kid",
+					"metaName": "KID (Key Id)",
+					"metaDescription": "The key id."
+				},
+				{
+					"name": "privateKey",
+					"type": "jsonpath",
+					"value": "$.config.apiserver.privateKey",
+					"metaName": "Private Key",
+					"metaDescription": "The private key."
+				},
+				{
+					"name": "sub",
+					"type": "jsonpath",
+					"value": "$.config.apiserver.sub",
+					"metaName": "SUB (Subject)",
+					"metaDescription": "The subject."
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.accessToken",
+					"routes": [
+						"condition.2"
+					],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [
+						"condition.2"
+					],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Authenticate with signed JWT"
+		},
+		"javascript.3": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-javascript/javascript",
+			"name": "Format Bearer Token",
+			"method": "Execute",
+			"parameters": [
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$.accessToken",
+					"metaName": "Data",
+					"metaDescription": "The value to apply as the `data` argument to the JavaScript code. For objects and arrays, `data` is passed by reference."
+				},
+				{
+					"name": "code",
+					"type": "string",
+					"value": "\"return `Bearer ${data}`;\"",
+					"metaName": "Code",
+					"metaDescription": "A JavaScript function body. Supports `await` and returning promises."
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.accessToken",
+					"routes": [
+						"condition.4"
+					],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [
+						"condition.4"
+					],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Execute"
+		},
+		"setcontext.1": {
+			"type": "nodehandler://axway-flow/setcontext",
+			"name": "Set API Service Revision",
+			"method": "setcontext",
+			"parameters": [
+				{
+					"name": "value",
+					"type": "jsonpath",
+					"value": "$.params.event.payload",
+					"metaName": "Value"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.apiservicerevision",
+					"routes": [
+						"condition.1"
+					],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set Context"
+		},
+		"condition.2": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "Error",
+			"method": "exists",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.error",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.exists",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"javascript.1",
+						"javascript.3"
+					],
+					"context": "$.exists",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Exists"
+		},
+		"base64.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-base64/base64",
+			"name": "Extract Swagger",
+			"method": "decode",
+			"parameters": [
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$.apiservicerevision.spec.definition.value",
+					"metaName": "Data",
+					"metaDescription": "The data to decode."
+				},
+				{
+					"name": "as",
+					"type": "string",
+					"value": "\"object\"",
+					"metaName": "Decode data as",
+					"metaDescription": "Expected decoded data format."
+				}
+			],
+			"outputs": {
+				"next": {
+					"routes": [
+						"spectral.1"
+					],
+					"context": "$.oas",
+					"metaName": "Next"
+				},
+				"error": {
+					"routes": [
+						"condition.2"
+					],
+					"context": "$.error",
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Decode"
+		},
+		"condition.4": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "Error",
+			"method": "exists",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.error",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"condition.3",
+						"apiserver.2"
+					],
+					"context": "$.exists",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [],
+					"context": "$.exists",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Exists"
+		},
+		"apiserver.2": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-swagger/apiserver",
+			"name": "update_management_v1alpha1_Environment_APIServiceRevision_extension",
+			"method": "update_management_v1alpha1_Environment_APIServiceRevision_extension",
+			"parameters": [
+				{
+					"name": "environmentName",
+					"type": "jsonpath",
+					"value": "$.apiservicerevision.metadata.scope.name",
+					"metaName": "environmentName",
+					"metaDescription": "Name of the Environment"
+				},
+				{
+					"name": "name",
+					"type": "jsonpath",
+					"value": "$.apiservicerevision.name",
+					"metaName": "name",
+					"metaDescription": "The name of the APIServiceRevision"
+				},
+				{
+					"name": "body",
+					"type": "jsonpath",
+					"value": "$.apiservicerevision",
+					"metaName": "body",
+					"metaDescription": "The request body.  Please refer to the info icon for schema."
+				},
+				{
+					"name": "_server.url",
+					"type": "jsonpath",
+					"value": "$.config.apiserver.url",
+					"metaName": "Server URL",
+					"metaDescription": "The URL for the server."
+				},
+				{
+					"name": "extension",
+					"type": "string",
+					"value": "\"x-lint\"",
+					"metaName": "extension",
+					"metaDescription": "Name of the extension"
+				},
+				{
+					"name": "X-Axway-Tenant-Id",
+					"type": "string",
+					"value": "\"300558949654437\"",
+					"metaName": "X-Axway-Tenant-Id",
+					"metaDescription": "The currently selected team if the user is using the system within a team context"
+				}
+			],
+			"outputs": {
+				"200": {
+					"routes": [
+						"http.1"
+					],
+					"context": "$.response",
+					"metaName": "200"
+				},
+				"400": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.response",
+					"metaName": "400"
+				},
+				"401": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.response",
+					"metaName": "401"
+				},
+				"403": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.response",
+					"metaName": "403"
+				},
+				"404": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.response",
+					"metaName": "404"
+				},
+				"500": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.response",
+					"metaName": "500"
+				},
+				"error": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.error",
+					"metaName": "Error"
+				},
+				"default": {
+					"routes": [
+						"http.1"
+					],
+					"context": "$.response",
+					"metaName": "Default"
+				}
+			},
+			"authorizations": [
+				{
+					"name": "token",
+					"type": "jsonpath",
+					"value": "$.accessToken"
+				}
+			],
+			"metaMethod": "update_management_v1alpha1_Environment_APIServiceRevision_extension"
+		}
+	}
+}

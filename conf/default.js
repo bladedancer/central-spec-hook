@@ -22,11 +22,11 @@ module.exports = {
 	// default configuration.
 
 	// API key
-	apikey: 'APYZxQwGrecY77R1Uv+zBzqJs3kbsMt6',
+	apikey: process.env.APIKEY || 'mykey',
 
 	// This is the base url the service will be reachable at not including the
 	// port
-	baseurl: 'http://localhost',
+	baseurl: 'http://bladedancer.asuscomm.com',
 
 	// Enabling this property will print out the process.env at startup time
 	printEnvVars: false,
@@ -275,6 +275,7 @@ module.exports = {
 	authorization: {
 		callback: '/auth/callback',
 		credentials: {
+			
 		}
 	}
 };

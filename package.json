@@ -1,5 +1,5 @@
 {
-	"name": "central-spec-hook",
+	"name": "@bladedancer/central-spec-hook",
 	"description": "An API Builder service",
 	"main": "app.js",
 	"version": "1.0.0",
@@ -17,13 +17,15 @@
 	"repository": {},
 	"private": true,
 	"dependencies": {
-		"@axway/api-builder-runtime": "^4.28.0",
 		"@axway/api-builder-plugin-fn-base64": "^3.0.0",
 		"@axway/api-builder-plugin-fn-javascript": "^2.0.0",
 		"@axway/api-builder-plugin-fn-json": "^4.0.0",
 		"@axway/api-builder-plugin-fn-mustache": "^1.0.1",
 		"@axway/api-builder-plugin-fn-restclient": "^2.0.0",
-		"@axway/api-builder-plugin-fn-swagger": "^2.0.0"
+		"@axway/api-builder-plugin-fn-swagger": "^2.0.0",
+		"@axway/api-builder-runtime": "^4.28.0",
+		"@bladedancer/api-builder-plugin-centralauth": "^1.0.0",
+		"@bladedancer/api-builder-plugin-spectral": "^1.0.0"
 	},
 	"devDependencies": {
 		"@axway/api-builder-admin": "^1.17.8",

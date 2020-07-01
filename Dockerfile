@@ -23,8 +23,8 @@ COPY --chown=axway-user:axway-group . /app
 # Install service dependencies relevant for production builds skipping all development dependencies.
 RUN npm install --production --no-optional
 
-# check every 5s to ensure this service is healthy
-HEALTHCHECK --interval=5s --start-period=10s --timeout=5s --retries=5 CMD node healthcheck.js
+# check every 30s to ensure this service is healthy
+HEALTHCHECK --interval=30s --start-period=30s --timeout=10s --retries=10 CMD node healthcheck.js
 
 # Starts the service
 CMD ["node", "."]
