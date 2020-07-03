@@ -111,7 +111,6 @@ module.exports = {
 		// empty list [] will allow unrestricted access, though this is not
 		// recommended due to security concerns.
 		allowedHosts: [
-			'localhost', '::1'
 		]
 	},
 
