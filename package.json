@@ -24,7 +24,7 @@
 		"@axway/api-builder-plugin-fn-restclient": "^2.0.0",
 		"@axway/api-builder-plugin-fn-swagger": "^2.0.0",
 		"@axway/api-builder-runtime": "^4.28.0",
-		"@bladedancer/api-builder-plugin-centralauth": "^1.0.0",
+		"@bladedancer/api-builder-plugin-centralauth": "^1.0.3",
 		"@bladedancer/api-builder-plugin-spectral": "^1.0.0"
 	},
 	"devDependencies": {
